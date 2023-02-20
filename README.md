@@ -21,7 +21,7 @@
  -->
 <!-- [![PkgEval](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/S/StridedViews.svg)](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/report.html) -->
 
-StridedViews.jl exports a single struct type `StridedView` for representing a strided view over a contiguous parrent array, as represented by the abstract type `DenseArray`. Strid
+StridedViews.jl exports a single struct type `StridedView` for representing a strided view over a contiguous parrent array, as represented by the abstract type `DenseArray`.
 
 See [Strided.jl](http://github.com/Jutho/Strided.jl) for more functionality.
 
