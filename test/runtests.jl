@@ -57,6 +57,8 @@ Random.seed!(1234)
 
         A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
         B4 = StridedView(A4)
+        B4[2,2,2,2] = 3
+        @test A4[2,2,2,2] == 3
         for op1 in (identity, conj)
             @test op1(A4) == op1(B4)
             for op2 in (identity, conj)
@@ -192,7 +194,7 @@ end
         @test isa(sview(B, :, 1:5, 3, 1:5), StridedView)
         @test_throws MethodError sview(B, :, [1, 2, 3], 3, 1:5)
 
-        @test view(A, 1:38) == view(B, 1:38) == sview(A, 1:38)
+        @test view(A, 1:38) == view(B, 1:38) == sview(A, 1:38) == sview(B, 1:38)
 
         @test view(B, :, 1:5, 3, 1:5) == view(A, :, 1:5, 3, 1:5) == sview(A, :, 1:5, 3, 1:5)
         @test view(B, :, 1:5, 3, 1:5) === sview(B, :, 1:5, 3, 1:5) === B[:, 1:5, 3, 1:5]
@@ -203,5 +205,5 @@ end
     end
 end
 
-# using Aqua
-# Aqua.test_all(StridedViews)
+using Aqua
+Aqua.test_all(StridedViews)

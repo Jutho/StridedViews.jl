@@ -141,7 +141,7 @@ end
 #-------------------------------------------------
 # we cannot use Base.view, as this also accepts indices that might not preserve stridedness
 sview(a::StridedView{<:Any,N}, I::Vararg{SliceIndex,N}) where {N} = getindex(a, I...)
-sview(a::StridedView, I::SliceIndex) = getindex(sreshape(a, (length(a),)), I...)
+sview(a::StridedView, I::SliceIndex) = getindex(sreshape(a, (length(a),)), I)
 
 # for StridedView and index arguments which preserve stridedness, we do replace Base.view with sview
 Base.view(a::StridedView{<:Any,N}, I::Vararg{SliceIndex,N}) where {N} = getindex(a, I...)
