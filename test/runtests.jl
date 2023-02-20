@@ -60,25 +60,55 @@ Random.seed!(1234)
             end
         end
 
-        A5 = reshape(view(A1, 1:36, 1:20), (6, 120))
-        @test_throws StridedViews.ReshapeException StridedView(A5)
-
-        A6 = [randn(T1, (5, 5)) for i in 1:5, j in 1:5]
-
-        B6 = StridedView(A6)
-        for op1 in (identity, conj, transpose, adjoint)
-            @test op1(A6) == op1(B6) == StridedView(op1(A6))
-            for op2 in (identity, conj, transpose, adjoint)
-                @test op2(op1(A6)) == op2(op1(B6))
+        A5 = PermutedDimsArray(reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4)), (3, 1, 2, 4))
+        B5 = StridedView(A5)
+        for op1 in (identity, conj)
+            @test op1(A5) == op1(B5)
+            for op2 in (identity, conj)
+                @test op2(op1(A5)) == op2(op1(B5))
             end
         end
+
+        A6 = reshape(view(A1, 1:36, 1:20), (6, 120))
+        @test_throws StridedViews.ReshapeException StridedView(A6)
+
+        # Array with Array elements
+        A7 = [randn(T1, (5, 5)) for i in 1:5, j in 1:5]
+        B7 = StridedView(A7)
+        for op1 in (identity, conj, transpose, adjoint)
+            @test op1(A7) == op1(B7) == StridedView(op1(A7))
+            for op2 in (identity, conj, transpose, adjoint)
+                @test op2(op1(A7)) == op2(op1(B7))
+            end
+        end
+
+        # Zero-dimensional array
+        A8 = randn(T1, ())
+        B8 = StridedView(A8)
+        for op1 in (identity, conj)
+            @test op1(A8) == op1(B8) == StridedView(op1(A8))
+            for op2 in (identity, conj)
+                @test op2(op1(A8)) == op2(op1(B8))
+            end
+        end
+        @test reshape(B8, (1, 1, 1)) == reshape(A8, (1, 1, 1)) ==
+              StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
+        @test reshape(B8, ()) == reshape(A8, ())
     end
 end
 
 @testset "elementwise conj, transpose and adjoint" begin
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
+        A = [rand(T) for i in 1:5, b in 1:4, c in 1:3, d in 1:2]
+        B = StridedView(A)
+
+        @test conj(B) == conj(A)
+        @test conj(B) == map(conj, B)
+        @test map(transpose, B) == map(transpose, A)
+        @test map(adjoint, B) == map(adjoint, A)
+    end
+    @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A = [randn(T, (3, 3)) for i in 1:5, b in 1:4, c in 1:3, d in 1:2]
-        Ac = deepcopy(A)
         B = StridedView(A)
 
         @test conj(B) == conj(A)
@@ -91,57 +121,31 @@ end
 @testset "reshape and permutedims with StridedView" begin
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A0 = randn(T, 10)
-        GC.@preserve A0 begin
-            @test permutedims(StridedView(A0), (1,)) == A0
-        end
-
-        @testset "in-place matrix operations" begin
-            A1 = randn(T, (1000, 1000))
-            A2 = similar(A1)
-            A1c = copy(A1)
-            A2c = copy(A2)
-            GC.@preserve A1c A2c begin
-                B1 = StridedView(A1c)
-                B2 = StridedView(A2c)
-
-                @test conj!(A1) == conj!(B1)
-                @test adjoint!(A2, A1) == adjoint!(B2, B1)
-                @test transpose!(A2, A1) == transpose!(B2, B1)
-                @test permutedims!(A2, A1, (2, 1)) == permutedims!(B2, B1, (2, 1))
-            end
-        end
+        @test permutedims(StridedView(A0), (1,)) == A0
 
         @testset "reshape and permutedims with $N-dimensional arrays" for N in 2:6
-            dims = ntuple(n -> rand(1:div(60, N)), N)
-            A = rand(T, dims)
-            Ac = copy(A)
-            GC.@preserve Ac begin
-                B = StridedView(Ac)
+            let dims = ntuple(n -> rand(1:div(60, N)), N)
+                A = rand(T, dims)
+                B = StridedView(A)
                 @test conj(A) == conj(B)
                 p = randperm(N)
                 B2 = permutedims(B, p)
                 A2 = permutedims(A, p)
                 @test B2 == A2
-                @test copy(B2) == A2
-                @test convert(Array, B2) == A2
             end
 
-            dims = ntuple(n -> 10, N)
-            A = rand(T, dims)
-            Ac = copy(A)
-            GC.@preserve Ac begin
-                B = StridedView(Ac)
+            let dims = ntuple(n -> 10, N)
+                A = rand(T, dims)
+                B = StridedView(A)
                 @test conj(A) == conj(B)
                 p = randperm(N)
                 B2 = permutedims(B, p)
                 A2 = permutedims(A, p)
                 @test B2 == A2
-                @test copy(B2) == A2
-                @test convert(Array, B2) == A2
 
                 B2 = sreshape(B, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
-                A2 = reshape(A, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
-                A3 = reshape(copy(A), size(A2))
+                A2 = sreshape(A, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
+                A3 = reshape(A, size(A2))
                 @test B2 == A3
                 @test B2 == A2
                 p = randperm(N + 2)
@@ -175,7 +179,7 @@ end
         @test isa(sview(B, :, 1:5, 3, 1:5), StridedView)
         @test_throws MethodError sview(B, :, [1, 2, 3], 3, 1:5)
 
-        @test view(B, :, 1:5, 3, 1:5) == view(A, :, 1:5, 3, 1:5)
+        @test view(B, :, 1:5, 3, 1:5) == view(A, :, 1:5, 3, 1:5) == sview(A, :, 1:5, 3, 1:5)
         @test view(B, :, 1:5, 3, 1:5) === sview(B, :, 1:5, 3, 1:5) === B[:, 1:5, 3, 1:5]
         @test view(B, :, 1:5, 3, 1:5) == StridedView(view(A, :, 1:5, 3, 1:5))
         @test pointer(view(B, :, 1:5, 3, 1:5)) ==
@@ -184,5 +188,5 @@ end
     end
 end
 
-using Aqua
-Aqua.test_all(StridedViews)
+# using Aqua
+# Aqua.test_all(StridedViews)

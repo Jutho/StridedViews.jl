@@ -64,7 +64,7 @@ end
 offset(a::StridedView) = a.offset
 Base.parent(a::StridedView) = a.parent
 
-# Indexing methods:
+# Indexing methods
 #------------------
 Base.IndexStyle(::Type{<:StridedView}) = Base.IndexCartesian()
 
