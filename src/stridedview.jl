@@ -151,7 +151,7 @@ Base.view(a::StridedView{<:Any,N}, I::Vararg{SliceIndex,N}) where {N} = getindex
     return getindex(StridedView(a), I...)
 end
 @inline function sview(a::AbstractArray, I::SliceIndex)
-    return getindex(sreshape(StridedView(a), (length(a),)), I...)
+    return getindex(sreshape(StridedView(a), (length(a),)), I)
 end
 
 # Creating or transforming StridedView by reshaping

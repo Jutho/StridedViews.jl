@@ -9,6 +9,10 @@ Random.seed!(1234)
     @testset for T1 in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A1 = randn(T1, (60, 60))
         B1 = StridedView(A1)
+        C1 = StridedView(B1)
+        @test C1 === B1
+        @test parent(B1) === A1
+        @test Base.elsize(B1) == Base.elsize(A1)
         for op1 in (identity, conj, transpose, adjoint)
             if op1 == transpose || op1 == adjoint
                 @test op1(A1) == op1(B1) == StridedView(op1(A1))
@@ -71,6 +75,13 @@ Random.seed!(1234)
 
         A6 = reshape(view(A1, 1:36, 1:20), (6, 120))
         @test_throws StridedViews.ReshapeException StridedView(A6)
+        try
+            StridedView(A6)
+        catch ex
+            println("Printing error message:")
+            show(ex)
+            println("")
+        end
 
         # Array with Array elements
         A7 = [randn(T1, (5, 5)) for i in 1:5, j in 1:5]
@@ -85,6 +96,7 @@ Random.seed!(1234)
         # Zero-dimensional array
         A8 = randn(T1, ())
         B8 = StridedView(A8)
+        @test stride(B8, 1) == stride(B8, 5) == 1
         for op1 in (identity, conj)
             @test op1(A8) == op1(B8) == StridedView(op1(A8))
             for op2 in (identity, conj)
@@ -110,6 +122,7 @@ end
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A = [randn(T, (3, 3)) for i in 1:5, b in 1:4, c in 1:3, d in 1:2]
         B = StridedView(A)
+        @test Base.elsize(B) == Base.elsize(A)
 
         @test conj(B) == conj(A)
         @test conj(B) == map(conj, B)
@@ -144,7 +157,7 @@ end
                 @test B2 == A2
 
                 B2 = sreshape(B, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
-                A2 = sreshape(A, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
+                A2 = sreshape(A, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2)...)
                 A3 = reshape(A, size(A2))
                 @test B2 == A3
                 @test B2 == A2
@@ -178,6 +191,8 @@ end
         @test isa(view(B, :, [1, 2, 3], 3, 1:5), Base.SubArray)
         @test isa(sview(B, :, 1:5, 3, 1:5), StridedView)
         @test_throws MethodError sview(B, :, [1, 2, 3], 3, 1:5)
+
+        @test view(A, 1:38) == view(B, 1:38) == sview(A, 1:38)
 
         @test view(B, :, 1:5, 3, 1:5) == view(A, :, 1:5, 3, 1:5) == sview(A, :, 1:5, 3, 1:5)
         @test view(B, :, 1:5, 3, 1:5) === sview(B, :, 1:5, 3, 1:5) === B[:, 1:5, 3, 1:5]
