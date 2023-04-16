@@ -1,5 +1,4 @@
-##################
-# StridedView.jl #
+################## StridedView.jl #
 ##################
 # Defines the main type of this package and its functionality
 
@@ -108,8 +107,8 @@ Base.conj(a::StridedView) = StridedView(a.parent, a.size, a.strides, a.offset, _
 
 @inline function Base.permutedims(a::StridedView{<:Any,N}, p) where {N}
     _isperm(N, p) || throw(ArgumentError("Invalid permutation of length $N: $p"))
-    newsize = ntuple(n->size(a, p[n]), N)
-    newstrides = ntuple(n->stride(a, p[n]), N)
+    newsize = ntuple(n -> size(a, p[n]), N)
+    newstrides = ntuple(n -> stride(a, p[n]), N)
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 
@@ -143,7 +142,8 @@ end
 sview(a::StridedView{<:Any,N}, I::Vararg{SliceIndex,N}) where {N} = getindex(a, I...)
 sview(a::StridedView, I::SliceIndex) = getindex(sreshape(a, (length(a),)), I)
 
-# for StridedView and index arguments which preserve stridedness, we do replace Base.view with sview
+# for StridedView and index arguments which preserve stridedness, we do replace Base.view
+# with sview
 Base.view(a::StridedView{<:Any,N}, I::Vararg{SliceIndex,N}) where {N} = getindex(a, I...)
 
 # `sview` can be used as a constructor when acting on `AbstractArray` objects
@@ -156,7 +156,8 @@ end
 
 # Creating or transforming StridedView by reshaping
 #---------------------------------------------------
-# we cannot use Base.reshape, as this also accepts indices that might not preserve stridedness
+# we cannot use Base.reshape, as this also accepts indices that might not preserve
+# stridedness
 sreshape(a, args::Vararg{Int}) = sreshape(a, args)
 @inline function sreshape(a::StridedView, newsize::Dims)
     if any(isequal(0), newsize)
@@ -170,8 +171,8 @@ end
 
 sreshape(a::AbstractArray, newsize::Dims) = sreshape(StridedView(a), newsize)
 
-# Other methods: `similar` and `copy`
-#-------------------------------------
+# Other methods: `similar`, `copy`
+#----------------------------------
 function Base.similar(a::StridedView, ::Type{T}, dims::NTuple{N,Int}) where {N,T}
     return StridedView(similar(a.parent, T, dims))
 end

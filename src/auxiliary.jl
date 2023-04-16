@@ -13,8 +13,8 @@ _computeind(indices::Tuple{}, strides::Tuple{}) = 1
 
 # 'Simplify' the dimensions of a `StridedView` to represent it with the largest possible
 # contiguous dimensions (thereby potentially fusing subsequent dimensions), without changing
-# the order of the elements. For type stability, we do not remove dimensions but replace them
-# with dimensions of size 1 and move all of those to the end.
+# the order of the elements. For type stability, we do not remove dimensions but replace
+# them with dimensions of size 1 and move all of those to the end.
 _simplifydims(size::Tuple{}, strides::Tuple{}) = size, strides
 _simplifydims(size::Dims{1}, strides::Dims{1}) = size, strides
 function _simplifydims(size::Dims{N}, strides::Dims{N}) where {N}
@@ -36,9 +36,10 @@ end
 function _normalizestrides(size::Dims{N}, strides::Dims{N}) where {N}
     for i in 1:N
         if size[i] == 1
-            strides = Base.setindex(strides, 1, i)
+            newstride = i == 1 ? 1 : strides[i - 1] * size[i - 1]
+            strides = Base.setindex(strides, newstride, i)
         elseif size[i] == 0
-            strides = one.(strides)
+            return one.(strides)
         end
     end
     return strides
@@ -46,7 +47,8 @@ end
 
 # Auxiliary methods for `sview`
 #------------------------------
-# Compute the new dimensions of a strided view given the original size and the view slicing indices
+# Compute the new dimensions of a strided view given the original size and the view slicing
+# indices
 @inline function _computeviewsize(oldsize::NTuple{N,Int}, I::NTuple{N,SliceIndex}) where {N}
     if isa(I[1], Int)
         return _computeviewsize(tail(oldsize), tail(I))
@@ -58,7 +60,8 @@ end
 end
 _computeviewsize(::Tuple{}, ::Tuple{}) = ()
 
-# Compute the new strides of a (strided) view given the original strides and the view slicing indices
+# Compute the new strides of a (strided) view given the original strides and the view
+# slicing indices
 @inline function _computeviewstrides(oldstrides::NTuple{N,Int},
                                      I::NTuple{N,SliceIndex}) where {N}
     if isa(I[1], Int)
@@ -72,7 +75,8 @@ _computeviewsize(::Tuple{}, ::Tuple{}) = ()
 end
 _computeviewstrides(::Tuple{}, ::Tuple{}) = ()
 
-# Compute the additional offset of a (strided) view given the original strides and the view slicing indices
+# Compute the additional offset of a (strided) view given the original strides and the view
+# slicing indices
 @inline function _computeviewoffset(strides::NTuple{N,Int},
                                     I::NTuple{N,SliceIndex}) where {N}
     if isa(I[1], Colon)
@@ -82,7 +86,6 @@ _computeviewstrides(::Tuple{}, ::Tuple{}) = ()
     end
 end
 _computeviewoffset(::Tuple{}, ::Tuple{}) = 0
-
 
 # Auxiliary methods for `sreshape`
 #----------------------------------
@@ -94,7 +97,8 @@ function Base.show(io::IO, e::ReshapeException)
     return print(io, msg)
 end
 
-# Compute the new strides of a (strided) reshape given the original strides and new and original sizes
+# Compute the new strides of a (strided) reshape given the original strides and new and
+# original sizes
 _computereshapestrides(newsize::Tuple{}, oldsize::Tuple{}, strides::Tuple{}) = strides
 function _computereshapestrides(newsize::Tuple{}, oldsize::Dims{N},
                                 strides::Dims{N}) where {N}

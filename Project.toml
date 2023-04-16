@@ -1,7 +1,7 @@
 name = "StridedViews"
 uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
-authors = ["Jutho <jutho.haegeman@ugent.be> and contributors"]
-version = "0.1.0"
+authors = ["Jutho Haegeman <jutho.haegeman@ugent.be> and contributors"]
+version = "0.1.1"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
