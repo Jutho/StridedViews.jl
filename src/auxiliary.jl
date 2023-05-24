@@ -39,7 +39,7 @@ function _normalizestrides(size::Dims{N}, strides::Dims{N}) where {N}
             newstride = i == 1 ? 1 : strides[i - 1] * size[i - 1]
             strides = Base.setindex(strides, newstride, i)
         elseif size[i] == 0
-            return one.(strides)
+            return (1, Base.front(cumprod(size))...)
         end
     end
     return strides
