@@ -57,8 +57,8 @@ Random.seed!(1234)
 
         A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
         B4 = StridedView(A4)
-        B4[2,2,2,2] = 3
-        @test A4[2,2,2,2] == 3
+        B4[2, 2, 2, 2] = 3
+        @test A4[2, 2, 2, 2] == 3
         for op1 in (identity, conj)
             @test op1(A4) == op1(B4)
             for op2 in (identity, conj)
@@ -206,4 +206,5 @@ end
 end
 
 using Aqua
-Aqua.test_all(StridedViews)
+Aqua.test_all(StridedViews;
+              project_toml_formatting=(VERSION >= v"1.9"))
