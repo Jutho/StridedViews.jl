@@ -206,4 +206,5 @@ end
 end
 
 using Aqua
-Aqua.test_all(StridedViews)
+Aqua.test_all(StridedViews;
+              project_toml_formatting=(VERSION >= v"1.9"))
