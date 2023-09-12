@@ -15,5 +15,6 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 StridedViewsCUDAExt = "CUDA"
 
 [compat]
-julia = "1.6"
 CUDA = "4"
+PackageExtensionCompat = "1"
+julia = "1.6"
