@@ -4,7 +4,16 @@ authors = ["Lukas Devos <lukas.devos@ugent.be>", "Jutho Haegeman <jutho.haegeman
 version = "0.1.2"
 
 [deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PackageExtensionCompat = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+
+[weakdeps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+
+[extensions]
+StridedViewsCUDAExt = "CUDA"
 
 [compat]
 julia = "1.6"
+CUDA = "4"
