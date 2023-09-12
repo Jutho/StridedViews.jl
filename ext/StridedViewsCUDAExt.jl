@@ -19,5 +19,4 @@ function Base.print_array(io::IO, X::CuStridedView)
     return Base.print_array(io, Adapt.adapt_structure(Array, X))
 end
 
-
 end # module

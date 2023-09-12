@@ -9,7 +9,7 @@ export StridedView, sreshape, sview
 
 include("auxiliary.jl")
 include("stridedview.jl")
-    
+
 using PackageExtensionCompat
 function __init__()
     @require_extensions
