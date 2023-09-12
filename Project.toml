@@ -1,7 +1,7 @@
 name = "StridedViews"
 uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
 authors = ["Lukas Devos <lukas.devos@ugent.be>", "Jutho Haegeman <jutho.haegeman@ugent.be>"]
-version = "0.1.2"
+version = "0.2.0"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
