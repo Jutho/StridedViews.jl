@@ -1,7 +1,7 @@
 name = "StridedViews"
 uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
 authors = ["Lukas Devos <lukas.devos@ugent.be>", "Jutho Haegeman <jutho.haegeman@ugent.be>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -15,7 +15,7 @@ CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 StridedViewsCUDAExt = "CUDA"
 
 [compat]
-CUDA = "4"
+CUDA = "4,5"
 PackageExtensionCompat = "1"
 julia = "1.6"
 
