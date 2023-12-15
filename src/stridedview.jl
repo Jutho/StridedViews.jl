@@ -113,7 +113,6 @@ Base.conj(a::StridedView) = StridedView(a.parent, a.size, a.strides, a.offset, _
 end
 
 Base.permutedims(a::StridedView{<:Any,1}) = sreshape(a, (1, length(a)))
-Base.permutedims(a::StridedView{<:Any,2}) = permutedims(a, (2, 1))
 
 LinearAlgebra.transpose(a::StridedView{<:Number}) = permutedims(a)
 LinearAlgebra.adjoint(a::StridedView{<:Number}) = permutedims(conj(a))
