@@ -114,14 +114,9 @@ end
 @testset "transpose and adjoint with vector StridedView" begin
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A = randn(T, (60,))
-        B = StridedView(A)
 
-        @test isa(permutedims(B), StridedView)
-        @test permutedims(B) == permutedims(A)
-        @test isa(transpose(B), StridedView)
-        @test transpose(B) == transpose(A)
-        @test isa(adjoint(B), StridedView)
-        @test adjoint(B) == adjoint(A)
+        @test sreshape(transpose(A), (1, length(A))) == transpose(A)
+        @test sreshape(adjoint(A), (1, length(A))) == adjoint(A)
     end
 end
 
@@ -220,5 +215,4 @@ end
 end
 
 using Aqua
-Aqua.test_all(StridedViews;
-              project_toml_formatting=(VERSION >= v"1.9"))
+Aqua.test_all(StridedViews)
