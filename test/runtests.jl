@@ -115,10 +115,12 @@ end
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A = randn(T, (60,))
         B = StridedView(A)
-        @test isa(B, StridedView)
 
+        @test isa(permutedims(B), StridedView)
         @test permutedims(B) == permutedims(A)
+        @test isa(transpose(B), StridedView)
         @test transpose(B) == transpose(A)
+        @test isa(adjoint(B), StridedView)
         @test adjoint(B) == adjoint(A)
     end
 end
