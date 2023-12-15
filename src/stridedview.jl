@@ -171,6 +171,13 @@ end
 
 sreshape(a::AbstractArray, newsize::Dims) = sreshape(StridedView(a), newsize)
 
+function sreshape(a::LinearAlgebra.AdjointAbsVec, newsize::Dims)
+    return sreshape(conj(StridedView(adjoint(a))), newsize)
+end
+function sreshape(a::LinearAlgebra.TransposeAbsVec, newsize::Dims)
+    return sreshape(StridedView(transpose(a)), newsize)
+end
+
 # Other methods: `similar`, `copy`
 #----------------------------------
 function Base.similar(a::StridedView, ::Type{T}, dims::NTuple{N,Int}) where {N,T}
