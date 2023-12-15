@@ -112,15 +112,16 @@ Base.conj(a::StridedView) = StridedView(a.parent, a.size, a.strides, a.offset, _
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 
-LinearAlgebra.transpose(a::StridedView{<:Number,2}) = permutedims(a, (2, 1))
-LinearAlgebra.adjoint(a::StridedView{<:Number,2}) = permutedims(conj(a), (2, 1))
-function LinearAlgebra.adjoint(a::StridedView{<:Any,2}) # act recursively, like Base
-    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op)),
-                       (2, 1))
+Base.permutedims(a::StridedView{<:Any,1}) = sreshape(a, (1, length(a)))
+Base.permutedims(a::StridedView{<:Any,2}) = permutedims(a, (2, 1))
+
+LinearAlgebra.transpose(a::StridedView{<:Number}) = permutedims(a)
+LinearAlgebra.adjoint(a::StridedView{<:Number}) = permutedims(conj(a))
+function LinearAlgebra.adjoint(a::StridedView) # act recursively, like Base
+    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op)))
 end
-function LinearAlgebra.transpose(a::StridedView{<:Any,2}) # act recursively, like Base
-    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op)),
-                       (2, 1))
+function LinearAlgebra.transpose(a::StridedView) # act recursively, like Base
+    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op)))
 end
 
 Base.map(::FC, a::StridedView{<:Real}) = a

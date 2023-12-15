@@ -111,6 +111,18 @@ Random.seed!(1234)
     end
 end
 
+@testset "transpose and adjoint with vector StridedView" begin
+    @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
+        A = randn(T, (60,))
+        B = StridedView(A)
+        @test isa(B, StridedView)
+
+        @test permutedims(B) == permutedims(A)
+        @test transpose(B) == transpose(A)
+        @test adjoint(B) == adjoint(A)
+    end
+end
+
 @testset "elementwise conj, transpose and adjoint" begin
     @testset for T in (Float32, Float64, Complex{Float32}, Complex{Float64})
         A = [rand(T) for i in 1:5, b in 1:4, c in 1:3, d in 1:2]
