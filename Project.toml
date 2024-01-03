@@ -10,9 +10,11 @@ PackageExtensionCompat = "65ce6f38-6b18-4e1d-a461-8949797d7930"
 
 [weakdeps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 
 [extensions]
 StridedViewsCUDAExt = "CUDA"
+StridedViewsFillArraysExt = "FillArrays"
 
 [compat]
 Aqua = "0.8"
@@ -22,11 +24,13 @@ PackageExtensionCompat = "1"
 Random = "1.6"
 Test = "1.6"
 julia = "1.6"
+FillArrays = "1"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 
 [targets]
-test = ["Test", "Random", "Aqua"]
+test = ["Test", "Random", "Aqua", "FillArrays"]
