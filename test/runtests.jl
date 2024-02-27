@@ -214,5 +214,7 @@ end
     end
 end
 
+include("fillarrays.jl")
+
 using Aqua
 Aqua.test_all(StridedViews)

@@ -24,7 +24,7 @@ _adjoint(::FT) = conj
 
 # StridedView type definition
 #-----------------------------
-struct StridedView{T,N,A<:DenseArray,F<:Union{FN,FC,FA,FT}} <: AbstractArray{T,N}
+struct StridedView{T,N,A<:AbstractArray,F<:Union{FN,FC,FA,FT}} <: AbstractArray{T,N}
     parent::A
     size::NTuple{N,Int}
     strides::NTuple{N,Int}
