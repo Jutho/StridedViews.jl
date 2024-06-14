@@ -177,10 +177,12 @@ end
 # Creating or transforming StridedView by reshaping
 #---------------------------------------------------
 # An error struct for non-strided reshapes
-struct ReshapeException <: Exception
+struct ReshapeException{N₁,N₂} <: Exception
+    newsize::Dims{N₁}
+    oldsize::Dims{N₂}
 end
 function Base.show(io::IO, e::ReshapeException)
-    msg = "Cannot produce a reshaped StridedView without allocating, try sreshape(copy(array), newsize) or fall back to reshape(array, newsize)"
+    msg = "Cannot reshape a StridedView of size $(e.oldsize) to newsize=$(e.newsize) without allocating, try `sreshape(copy(array), newsize)` or fall back to `reshape(array, newsize)`."
     return print(io, msg)
 end
 
@@ -194,7 +196,7 @@ sreshape(a, args::Vararg{Int}) = sreshape(a, args)
     else
         newstrides = _computereshapestrides(newsize, _simplifydims(size(a), strides(a))...)
     end
-    isnothing(newstrides) && throw(ReshapeException())
+    isnothing(newstrides) && throw(ReshapeException(newsize, size(a)))
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 
