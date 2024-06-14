@@ -70,6 +70,7 @@ function isstrided(a::Base.ReshapedArray)
     return !isnothing(newstrides)
 end
 isstrided(a::Base.PermutedDimsArray) = isstrided(a.parent)
+isstrided(a::AbstractArray) = false
 
 # Elementary properties
 #-----------------------
