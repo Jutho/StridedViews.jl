@@ -10,6 +10,8 @@ Random.seed!(1234)
         A1 = randn(T1, (60, 60))
         B1 = StridedView(A1)
         C1 = StridedView(B1)
+        @test isstrided(A1)
+        @test isstrided(B1)
         @test C1 === B1
         @test parent(B1) === A1
         @test Base.elsize(B1) == Base.elsize(A1)
@@ -25,6 +27,7 @@ Random.seed!(1234)
         end
 
         A2 = view(A1, 1:36, 1:20)
+        @test isstrided(A2)
         B2 = StridedView(A2)
         for op1 in (identity, conj, transpose, adjoint)
             if op1 == transpose || op1 == adjoint
@@ -38,6 +41,7 @@ Random.seed!(1234)
         end
 
         A3 = reshape(A1, 360, 10)
+        @test isstrided(A3)
         B3 = StridedView(A3)
         @test size(A3) == size(B3)
         @test strides(A3) == strides(B3)
@@ -56,6 +60,7 @@ Random.seed!(1234)
         end
 
         A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
+        @test isstrided(A4)
         B4 = StridedView(A4)
         B4[2, 2, 2, 2] = 3
         @test A4[2, 2, 2, 2] == 3
@@ -67,6 +72,7 @@ Random.seed!(1234)
         end
 
         A5 = PermutedDimsArray(reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4)), (3, 1, 2, 4))
+        @test isstrided(A5)
         B5 = StridedView(A5)
         for op1 in (identity, conj)
             @test op1(A5) == op1(B5)
@@ -76,6 +82,7 @@ Random.seed!(1234)
         end
 
         A6 = reshape(view(A1, 1:36, 1:20), (6, 120))
+        @test !isstrided(A6)
         @test_throws StridedViews.ReshapeException StridedView(A6)
         try
             StridedView(A6)
@@ -87,6 +94,7 @@ Random.seed!(1234)
 
         # Array with Array elements
         A7 = [randn(T1, (5, 5)) for i in 1:5, j in 1:5]
+        @test isstrided(A7)
         B7 = StridedView(A7)
         for op1 in (identity, conj, transpose, adjoint)
             @test op1(A7) == op1(B7) == StridedView(op1(A7))
@@ -109,6 +117,8 @@ Random.seed!(1234)
               StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
         @test reshape(B8, ()) == reshape(A8, ())
     end
+
+    @test !isstrided(Diagonal([0.5, 1.0, 1.5]))
 end
 
 @testset "transpose and adjoint with vector StridedView" begin
@@ -117,6 +127,8 @@ end
 
         @test sreshape(transpose(A), (1, length(A))) == transpose(A)
         @test sreshape(adjoint(A), (1, length(A))) == adjoint(A)
+        @test isstrided(transpose(A))
+        @test isstrided(adjoint(A))
     end
 end
 
