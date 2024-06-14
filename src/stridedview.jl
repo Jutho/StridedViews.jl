@@ -52,6 +52,25 @@ function StridedView(a::Base.PermutedDimsArray{T,N,P}) where {T,N,P}
     return permutedims(StridedView(a.parent), P)
 end
 
+# trait
+isstrided(a::DenseArray) = true
+isstrided(a::StridedView) = true
+isstrided(a::Adjoint) = isstrided(a')
+isstrided(a::Transpose) = isstrided(transpose(a))
+function isstrided(a::Base.SubArray)
+    return isstrided(a.parent) && all(Base.Fix2(isa, SliceIndex), a.indices)
+end
+function isstrided(a::Base.ReshapedArray)
+    isstrided(a.parent) || return false
+    newsize = a.dims
+    oldsize = size(a.parent)
+    any(isequal(0), newsize) && return true
+    newstrides = _computereshapestrides(newsize,
+                                        _simplifydims(oldsize, strides(a.parent))...)
+    return !isnothing(newstrides)
+end
+isstrided(a::Base.PermutedDimsArray) = isstrided(a.parent)
+
 # Elementary properties
 #-----------------------
 Base.size(a::StridedView) = a.size
@@ -156,6 +175,14 @@ end
 
 # Creating or transforming StridedView by reshaping
 #---------------------------------------------------
+# An error struct for non-strided reshapes
+struct ReshapeException <: Exception
+end
+function Base.show(io::IO, e::ReshapeException)
+    msg = "Cannot produce a reshaped StridedView without allocating, try sreshape(copy(array), newsize) or fall back to reshape(array, newsize)"
+    return print(io, msg)
+end
+
 # we cannot use Base.reshape, as this also accepts indices that might not preserve
 # stridedness
 sreshape(a, args::Vararg{Int}) = sreshape(a, args)
@@ -166,6 +193,7 @@ sreshape(a, args::Vararg{Int}) = sreshape(a, args)
     else
         newstrides = _computereshapestrides(newsize, _simplifydims(size(a), strides(a))...)
     end
+    isnothing(newstrides) && throw(ReshapeException())
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 

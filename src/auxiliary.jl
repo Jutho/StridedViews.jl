@@ -89,14 +89,6 @@ _computeviewoffset(::Tuple{}, ::Tuple{}) = 0
 
 # Auxiliary methods for `sreshape`
 #----------------------------------
-# An error struct for non-strided reshapes
-struct ReshapeException <: Exception
-end
-function Base.show(io::IO, e::ReshapeException)
-    msg = "Cannot produce a reshaped StridedView without allocating, try sreshape(copy(array), newsize) or fall back to reshape(array, newsize)"
-    return print(io, msg)
-end
-
 # Compute the new strides of a (strided) reshape given the original strides and new and
 # original sizes
 _computereshapestrides(newsize::Tuple{}, oldsize::Tuple{}, strides::Tuple{}) = strides
@@ -117,17 +109,19 @@ function _computereshapestrides(newsize::Dims, oldsize::Dims{N}, strides::Dims{N
             # not shrinking the following tuples helps type inference
             oldsize = (tail(oldsize)..., 1)
             strides = (tail(strides)..., 1)
-            return (s1, _computereshapestrides(tail(newsize), oldsize, strides)...)
+            stail = _computereshapestrides(tail(newsize), oldsize, strides)
+            return isnothing(stail) ? nothing : (s1, stail...)
         else
             oldsize = (d, tail(oldsize)...)
             strides = (newsize[1] * s1, tail(strides)...)
-            return (s1, _computereshapestrides(tail(newsize), oldsize, strides)...)
+            stail = _computereshapestrides(tail(newsize), oldsize, strides)
+            return isnothing(stail) ? nothing : (s1, stail...)
         end
     else
         if prod(newsize) != prod(oldsize)
             throw(DimensionMismatch())
         else
-            throw(ReshapeException())
+            return nothing
         end
     end
 end
