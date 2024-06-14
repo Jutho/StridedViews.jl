@@ -117,6 +117,8 @@ Random.seed!(1234)
               StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
         @test reshape(B8, ()) == reshape(A8, ())
     end
+
+    @test !isstrided(Diagonal([0.5, 1.0, 1.5]))
 end
 
 @testset "transpose and adjoint with vector StridedView" begin
