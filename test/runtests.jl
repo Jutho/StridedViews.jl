@@ -42,6 +42,7 @@ Random.seed!(1234)
 
         A3 = reshape(A1, 360, 10)
         @test isstrided(A3)
+        @test !isstrided(reshape(A1', 10, 360))
         B3 = StridedView(A3)
         @test size(A3) == size(B3)
         @test strides(A3) == strides(B3)
@@ -59,11 +60,34 @@ Random.seed!(1234)
             end
         end
 
-        A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
+        A4 = reshape(A1', (6, 10, 5, 12))
         @test isstrided(A4)
         B4 = StridedView(A4)
         B4[2, 2, 2, 2] = 3
         @test A4[2, 2, 2, 2] == 3
+        for op1 in (identity, conj)
+            @test op1(A4) == op1(B4)
+            for op2 in (identity, conj)
+                @test op2(op1(A4)) == op2(op1(B4))
+            end
+        end
+
+        A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
+        @test isstrided(A4)
+        B4 = StridedView(A4)
+        B4[2, 2, 2, 2] = 4
+        @test A4[2, 2, 2, 2] == 4
+        for op1 in (identity, conj)
+            @test op1(A4) == op1(B4)
+            for op2 in (identity, conj)
+                @test op2(op1(A4)) == op2(op1(B4))
+            end
+        end
+
+        A4 = reshape(view(A1', 1:36, 1:20), (6, 6, 5, 4))
+        B4 = StridedView(A4)
+        B4[2, 2, 2, 2] = 5
+        @test A4[2, 2, 2, 2] == 5
         for op1 in (identity, conj)
             @test op1(A4) == op1(B4)
             for op2 in (identity, conj)

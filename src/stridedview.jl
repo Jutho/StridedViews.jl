@@ -66,11 +66,24 @@ function isstrided(a::Base.ReshapedArray)
     oldsize = size(a.parent)
     any(isequal(0), newsize) && return true
     newstrides = _computereshapestrides(newsize,
-                                        _simplifydims(oldsize, strides(a.parent))...)
+                                        _simplifydims(oldsize, _strides(a.parent))...)
     return !isnothing(newstrides)
 end
 isstrided(a::Base.PermutedDimsArray) = isstrided(a.parent)
 isstrided(a::AbstractArray) = false
+
+# work around annoying Base behavior: it doesn't define strides for complex adjoints
+# because of the recursiveness of the definitions, we need to redefine all of them
+_strides(a::DenseArray) = strides(a)
+_strides(a::Adjoint{<:Any,<:AbstractVector}) = (stride(a.parent, 2), stride(a.parent, 1))
+_strides(a::Adjoint{<:Any,<:AbstractMatrix}) = reverse(strides(a.parent))
+_strides(a::Transpose{<:Any,<:AbstractVector}) = (stride(a.parent, 2), stride(a.parent, 1))
+_strides(a::Transpose{<:Any,<:AbstractMatrix}) = reverse(strides(a.parent))
+function _strides(a::PermutedDimsArray{T,N,perm}) where {T,N,perm}
+    s = _strides(parent(a))
+    return ntuple(d -> s[perm[d]], Val(N))
+end
+_strides(a::SubArray) = Base.substrides(_strides(a.parent), a.indices)
 
 # Elementary properties
 #-----------------------
@@ -180,9 +193,10 @@ end
 struct ReshapeException{N₁,N₂} <: Exception
     newsize::Dims{N₁}
     oldsize::Dims{N₂}
+    strides::Dims{N₂}
 end
 function Base.show(io::IO, e::ReshapeException)
-    msg = "Cannot reshape a StridedView of size $(e.oldsize) to newsize=$(e.newsize) without allocating, try `sreshape(copy(array), newsize)` or fall back to `reshape(array, newsize)`."
+    msg = "Cannot reshape a StridedView with size $(e.oldsize) and strides $(e.strides) to newsize=$(e.newsize) without allocating, try `sreshape(copy(array), newsize)` or fall back to `reshape(array, newsize)`."
     return print(io, msg)
 end
 
@@ -196,7 +210,7 @@ sreshape(a, args::Vararg{Int}) = sreshape(a, args)
     else
         newstrides = _computereshapestrides(newsize, _simplifydims(size(a), strides(a))...)
     end
-    isnothing(newstrides) && throw(ReshapeException(newsize, size(a)))
+    isnothing(newstrides) && throw(ReshapeException(newsize, size(a), strides(a)))
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 
