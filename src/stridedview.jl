@@ -140,8 +140,8 @@ Base.conj(a::StridedView) = StridedView(a.parent, a.size, a.strides, a.offset, _
 
 @inline function Base.permutedims(a::StridedView{<:Any,N}, p) where {N}
     _isperm(N, p) || throw(ArgumentError("Invalid permutation of length $N: $p"))
-    newsize = ntuple(n -> size(a, p[n]), N)
-    newstrides = ntuple(n -> stride(a, p[n]), N)
+    newsize = ntuple(n -> size(a, p[n]), Val(N))
+    newstrides = ntuple(n -> stride(a, p[n]), Val(N))
     return StridedView(a.parent, newsize, newstrides, a.offset, a.op)
 end
 
