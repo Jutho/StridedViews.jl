@@ -1,40 +1,85 @@
 name: Invalidations
+description: 'Evaluate number of invalidations'
 
-on:
-  pull_request:
+inputs:
+  test_script:
+    description: 'Script to test for invalidations. Defaults to `import Package`'
+    required: false
+    default: ''
+  package_name:
+    description: 'Name of the package. By default, tries to auto-detect from the repo name.'
+    required: false
+    default: ''
+    type: string
+  max_invalidations:
+    description: 'Maximum number of invalidations to report. Defaults to `0` (no limit)'
+    required: false
+    default: '0'
+    type: number
 
-concurrency:
-  # Skip intermediate builds: always.
-  # Cancel intermediate builds: always.
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+outputs:
+  total: 
+    description: "Total number of invalidations"
+    value: ${{ steps.invs.outputs.total }}
+  deps: 
+    description: "Number of invalidations caused by deps"
+    value: ${{ steps.invs.outputs.deps }}
 
-jobs:
-  evaluate:
-    # Only run on PRs to the default branch.
-    # In the PR trigger above branches can be specified only explicitly whereas this check should work for master, main, or any other default branch
-    if: github.base_ref == github.event.repository.default_branch
-    runs-on: ubuntu-latest
-    steps:
-    - uses: julia-actions/setup-julia@v2
-      with:
-        version: '1'
-    - uses: actions/checkout@v4
-    - uses: julia-actions/julia-buildpkg@v1
-    - uses: julia-actions/julia-invalidations@v1
-      id: invs_pr
-
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.repository.default_branch }}
-    - uses: julia-actions/julia-buildpkg@v1
-    - uses: julia-actions/julia-invalidations@v1
-      id: invs_default
-
-    - name: Report invalidation counts
+runs:
+  using: "composite"
+  steps: 
+    - name: Get package name
+      id: info
       run: |
-        echo "Invalidations on default branch: ${{ steps.invs_default.outputs.total }} (${{ steps.invs_default.outputs.deps }} via deps)" >> $GITHUB_STEP_SUMMARY
-        echo "This branch: ${{ steps.invs_pr.outputs.total }} (${{ steps.invs_pr.outputs.deps }} via deps)" >> $GITHUB_STEP_SUMMARY
-    - name: Check if the PR does increase number of invalidations
-      if: steps.invs_pr.outputs.total > steps.invs_default.outputs.total
-      run: exit 1
+          REPONAME="${{ github.event.repository.name }}"
+          if [[ '${{ inputs.package_name }}' == '' ]]; then
+            PACKAGENAME=${REPONAME%.jl}
+          else
+            PACKAGENAME="${{ inputs.package_name }}"
+          fi
+          echo "packagename=$PACKAGENAME" >> $GITHUB_OUTPUT
+          if [[ '${{ inputs.test_script }}' == '' ]]; then
+            TESTSCRIPT="import ${PACKAGENAME}"
+          else
+            TESTSCRIPT="${{ inputs.test_script }}"
+          fi
+          echo "testscript=$TESTSCRIPT" >> $GITHUB_OUTPUT
+      shell: bash
+      
+    - name: Install SnoopCompile tools
+      run: |
+        import Pkg;
+        pkgs = [
+            Pkg.PackageSpec(name = "SnoopCompile", version = "2", uuid = "aa65fe97-06da-5843-b5b1-d5d13cad87d2"),
+            Pkg.PackageSpec(name = "SnoopCompileCore", uuid = "e2b509da-e806-4183-be48-004708413034"),
+            Pkg.PackageSpec(name = "PrettyTables", uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"),
+        ]
+        Pkg.add(pkgs)
+      shell: julia --project {0}
+    - name: Load package on branch
+      id: invs
+      run: |
+        using SnoopCompileCore: @snoopr
+        invalidations = @snoopr begin ${{ steps.info.outputs.testscript }} end
+        
+        using SnoopCompile: SnoopCompile, filtermod, invalidation_trees, uinvalidated
+        inv_owned = length(filtermod(${{ steps.info.outputs.packagename }}, invalidation_trees(invalidations)))
+        inv_total = length(uinvalidated(invalidations))
+        inv_deps = inv_total - inv_owned
+        
+        @show inv_total, inv_deps
+
+        # Report invalidations summary:
+        import PrettyTables  # needed for `report_invalidations` to be defined
+        SnoopCompile.report_invalidations(;
+             invalidations,
+             process_filename = x -> last(split(x, ".julia/packages/")),
+             n_rows = ${{ inputs.max_invalidations }},
+        )
+
+        # Set outputs
+        open(ENV["GITHUB_OUTPUT"], "a") do io
+          println(io, "total=$(inv_total)")
+          println(io, "deps=$(inv_deps)")
+        end
+      shell: julia --color=yes --project=. {0}    
