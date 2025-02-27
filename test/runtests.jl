@@ -13,7 +13,7 @@ Random.seed!(1234)
         @test isstrided(A1)
         @test isstrided(B1)
         @test C1 === B1
-        @test parent(B1) === A1
+        @test parent(B1) == reshape(A1, :)
         @test Base.elsize(B1) == Base.elsize(A1)
         for op1 in (identity, conj, transpose, adjoint)
             if op1 == transpose || op1 == adjoint

@@ -34,13 +34,15 @@ end
 
 # Constructors
 #--------------
-function StridedView(parent::A,
+function StridedView(parent::DenseArray,
                      size::NTuple{N,Int}=size(parent),
                      strides::NTuple{N,Int}=strides(parent),
                      offset::Int=0,
-                     op::F=identity) where {A<:DenseArray,N,F}
+                     op::F=identity) where {N,F}
     T = Base.promote_op(op, eltype(parent))
-    return StridedView{T,N,A,F}(parent, size, _normalizestrides(size, strides), offset, op)
+    parent′ = _normalizeparent(parent)
+    strides′ = _normalizestrides(size, strides)
+    return StridedView{T,N,typeof(parent′),F}(parent′, size, strides′, offset, op)
 end
 
 StridedView(a::StridedView) = a

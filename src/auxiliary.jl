@@ -45,6 +45,10 @@ function _normalizestrides(size::Dims{N}, strides::Dims{N}) where {N}
     return strides
 end
 
+# 'Normalize' the layout of a DenseArray, in order to reduce the number of required
+# specializations in functions.
+@inline _normalizeparent(A::DenseArray) = reshape(A, length(A))
+
 # Auxiliary methods for `sview`
 #------------------------------
 # Compute the new dimensions of a strided view given the original size and the view slicing
