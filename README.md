@@ -50,3 +50,10 @@ subsequent dimensions `i` and `i+1` can only be joined if `stride(A,i+1) ==
 size(A,i)*stride(A,i)`. Instead of overloading `reshape`, Strided.jl provides a separate
 function `sreshape` which returns a `StridedView` over the same parent data, or throws a
 runtime error if this is impossible.
+
+### News
+
+Since StridedViews v0.4.0, the `StridedView` type attempts to generate less specializations
+by normalizing the parent array type. In particular, for `DenseArray` parents we attempt to
+reshape the parent array to a vector, and for `Memory`-based arrays (Julia v1.11+) we unpack
+the `Memory` object directly. This should improve compile times.
