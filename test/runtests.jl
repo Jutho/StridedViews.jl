@@ -194,7 +194,7 @@ end
                 @test B2 == A2
             end
 
-            let dims = ntuple(n -> 10, N)
+            let dims = ntuple(n -> 6, N)
                 A = rand(T, dims)
                 B = StridedView(A)
                 @test conj(A) == conj(B)
@@ -203,8 +203,8 @@ end
                 A2 = permutedims(A, p)
                 @test B2 == A2
 
-                B2 = sreshape(B, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2))
-                A2 = sreshape(A, (2, 5, ntuple(n -> 10, N - 2)..., 5, 2)...)
+                B2 = sreshape(B, (2, 3, ntuple(n -> 6, N - 2)..., 3, 2))
+                A2 = sreshape(A, (2, 3, ntuple(n -> 6, N - 2)..., 3, 2)...)
                 A3 = reshape(A, size(A2))
                 @test B2 == A3
                 @test B2 == A2
