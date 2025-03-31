@@ -257,6 +257,7 @@ using PtrArrays
         @test isstrided(A)
         B = StridedView(A)
         @test B isa StridedView
+        @test B == A
         free(A)
     end
 end
