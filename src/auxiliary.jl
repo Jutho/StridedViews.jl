@@ -47,10 +47,12 @@ end
 
 # 'Normalize' the layout of a DenseArray, in order to reduce the number of required
 # specializations in functions.
+@inline _normalizeparent(A) = A
 @static if isdefined(Core, :Memory)
     @inline _normalizeparent(A::Array) = A.ref.mem
+else
+    @inline _normalizeparent(A::Array) = reshape(A, length(A))
 end
-@inline _normalizeparent(A::DenseArray) = reshape(A, length(A))
 
 # Auxiliary methods for `sview`
 #------------------------------
