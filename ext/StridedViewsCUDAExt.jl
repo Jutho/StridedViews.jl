@@ -1,14 +1,16 @@
 module StridedViewsCUDAExt
 
 using StridedViews
+using StridedView: reinterprettype
 using CUDA
 using CUDA: Adapt
 
 const CuStridedView{T,N,A<:CuArray{T}} = StridedView{T,N,A}
 
 function Adapt.adapt_structure(::Type{T}, A::StridedView) where {T}
-    return StridedView(Adapt.adapt_structure(T, parent(A)), A.size, A.strides, A.offset,
-                       A.op)
+    return StridedView(Adapt.adapt_structure(T, parent(A)), 
+                        A.size, A.strides, A.offset,
+                        A.op, reinterprettype(A))
 end
 
 function Base.unsafe_convert(::Type{CUDA.CuPtr{T}}, a::CuStridedView{T}) where {T}

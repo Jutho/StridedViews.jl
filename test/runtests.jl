@@ -250,6 +250,30 @@ end
     end
 end
 
+@testset "reinterpretarraty" begin
+    struct MyComplex
+        re::Float64
+        im::Float64
+    end
+    a = MyComplex.(randn(5,5,5), randn(5,5,5))
+    b = reinterpret(ComplexF64, a)
+    sb = StridedView(b)
+    csb = conj(sb)
+    for index in CartesianIndices(a)
+        @test sb[index] == a[index].re + im * a[index].im
+        @test csb[index] == a[index].re - im * a[index].im
+    end
+    b2 = permutedims(reshape(sb, (25, 5)), (2, 1))
+    cb2 = b2'
+    a2 = permutedims(reshape(a, (25, 5)), (2, 1))
+    for j in 1:size(b2, 2)
+        for i in 1:size(b2, 1)
+            @test b2[i, j] == a2[i, j].re + im * a2[i, j].im
+            @test cb2[j, i] == a2[i, j].re - im * a2[i, j].im
+        end
+    end
+end
+
 using PtrArrays
 @testset "PtrArrays with StridedView" begin
     @testset for T in (Float64, ComplexF64)
