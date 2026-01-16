@@ -250,7 +250,7 @@ end
     end
 end
 
-@testset "reinterpretarraty" begin
+@testset "reinterpretarray" begin
     struct MyComplex
         re::Float64
         im::Float64
@@ -289,5 +289,7 @@ end
 using Aqua
 Aqua.test_all(StridedViews)
 
-using JET
-JET.test_package(StridedViews; target_modules=(StridedViews,))
+if isempty(VERSION.prerelease)
+    using JET
+    JET.test_package(MatrixAlgebraKit; target_defined_modules=true)
+end
