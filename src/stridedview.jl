@@ -58,7 +58,7 @@ function StridedView(a::Base.ReinterpretArray{S,N}) where {S,N}
     b = StridedView(a.parent)
     T = eltype(b)
     isbitstype(T) && isbitstype(S) && sizeof(T) == sizeof(S) ||
-        throw(ArgumentError("Cannot create StridedView with reinterpretation from $TS to $S"))
+        throw(ArgumentError("Cannot create StridedView with reinterpretation from $T to $S"))
     b.op isa FN ||
         throw(ArgumentError("Cannot create StridedView with reinterpretation from view with non-identity operation"))
     return StridedView(b.parent, size(b), strides(b), offset(b), identity, S)
@@ -265,8 +265,7 @@ Base.copy(a::StridedView) = copyto!(similar(a), a)
 function Base.unsafe_convert(::Type{Ptr{T}}, a::StridedView{T}) where {T}
     return convert(Ptr{T}, pointer(a.parent, a.offset + 1))
 end
-function Base.elsize(::Type{<:StridedView{T}}) where {T}
-    return Base.isbitstype(T) ? sizeof(T) :
-           (Base.isbitsunion(T) ? Base.bitsunionsize(T) : sizeof(Ptr))
+function Base.elsize(::Type{<:StridedView{T,N,S,A}}) where {T,N,S,A}
+    return Base.elsize(A)
 end
 Base.dataids(a::StridedView) = Base.dataids(a.parent)
