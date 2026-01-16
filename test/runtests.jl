@@ -291,5 +291,5 @@ Aqua.test_all(StridedViews)
 
 if isempty(VERSION.prerelease)
     using JET
-    JET.test_package(MatrixAlgebraKit; target_defined_modules=true)
+    JET.test_package(StridedViews; target_modules=(StridedViews,))
 end
