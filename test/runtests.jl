@@ -255,7 +255,7 @@ end
         re::Float64
         im::Float64
     end
-    a = MyComplex.(randn(5,5,5), randn(5,5,5))
+    a = MyComplex.(randn(5, 5, 5), randn(5, 5, 5))
     b = reinterpret(ComplexF64, a)
     sb = StridedView(b)
     csb = conj(sb)

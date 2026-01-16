@@ -39,7 +39,7 @@ function StridedView(parent::DenseArray,
                      strides::NTuple{N,Int}=strides(parent),
                      offset::Int=0,
                      op::F=identity,
-                     ::Type{S} = eltype(parent)) where {N,F,S}
+                     ::Type{S}=eltype(parent)) where {N,F,S}
     T = Base.promote_op(op, S)
     parent′ = _normalizeparent(parent)
     strides′ = _normalizestrides(size, strides)
@@ -57,9 +57,9 @@ end
 function StridedView(a::Base.ReinterpretArray{S,N}) where {S,N}
     b = StridedView(a.parent)
     T = eltype(b)
-    isbitstype(T) && isbitstype(S) && sizeof(T) == sizeof(S) || 
+    isbitstype(T) && isbitstype(S) && sizeof(T) == sizeof(S) ||
         throw(ArgumentError("Cannot create StridedView with reinterpretation from $TS to $S"))
-    b.op isa FN || 
+    b.op isa FN ||
         throw(ArgumentError("Cannot create StridedView with reinterpretation from view with non-identity operation"))
     return StridedView(b.parent, size(b), strides(b), offset(b), identity, S)
 end
@@ -130,8 +130,8 @@ end
 # Indexing with slice indices to create a new view
 @inline function Base.getindex(a::StridedView{<:Any,N},
                                I::Vararg{SliceIndex,N}) where {N}
-    return StridedView(a.parent, 
-                        _computeviewsize(a.size, I),
+    return StridedView(a.parent,
+                       _computeviewsize(a.size, I),
                        _computeviewstrides(a.strides, I),
                        a.offset + _computeviewoffset(a.strides, I),
                        a.op,
@@ -158,7 +158,10 @@ end
 # Specific Base methods that are guaranteed to preserve`StridedView` objects
 #----------------------------------------------------------------------------
 Base.conj(a::StridedView{<:Real}) = a
-Base.conj(a::StridedView) = StridedView(a.parent, a.size, a.strides, a.offset, _conj(a.op), reinterprettype(a))
+function Base.conj(a::StridedView)
+    return StridedView(a.parent, a.size, a.strides, a.offset, _conj(a.op),
+                       reinterprettype(a))
+end
 
 @inline function Base.permutedims(a::StridedView{T,N}, p) where {T,N}
     _isperm(N, p) || throw(ArgumentError("Invalid permutation of length $N: $p"))
@@ -170,11 +173,13 @@ end
 LinearAlgebra.transpose(a::StridedView{<:Number,2}) = permutedims(a, (2, 1))
 LinearAlgebra.adjoint(a::StridedView{<:Number,2}) = permutedims(conj(a), (2, 1))
 function LinearAlgebra.adjoint(a::StridedView{T,2}) where {T} # act recursively, like Base
-    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op), reinterprettype(a)),
+    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op),
+                                   reinterprettype(a)),
                        (2, 1))
 end
 function LinearAlgebra.transpose(a::StridedView{T,2}) where {T} # act recursively, like Base
-    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op), reinterprettype(a)),
+    return permutedims(StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op),
+                                   reinterprettype(a)),
                        (2, 1))
 end
 
@@ -182,13 +187,16 @@ Base.map(::FC, a::StridedView{<:Real}) = a
 Base.map(::FT, a::StridedView{<:Number}) = a
 Base.map(::FA, a::StridedView{<:Number}) = conj(a)
 function Base.map(::FC, a::StridedView)
-    return StridedView(a.parent, a.size, a.strides, a.offset, _conj(a.op), reinterprettype(a))
+    return StridedView(a.parent, a.size, a.strides, a.offset, _conj(a.op),
+                       reinterprettype(a))
 end
 function Base.map(::FT, a::StridedView)
-    return StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op), reinterprettype(a))
+    return StridedView(a.parent, a.size, a.strides, a.offset, _transpose(a.op),
+                       reinterprettype(a))
 end
 function Base.map(::FA, a::StridedView)
-    return StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op), reinterprettype(a))
+    return StridedView(a.parent, a.size, a.strides, a.offset, _adjoint(a.op),
+                       reinterprettype(a))
 end
 
 # Creating or transforming StridedView by slicing
