@@ -290,4 +290,4 @@ using Aqua
 Aqua.test_all(StridedViews)
 
 using JET
-JET.test_package(StridedViews)
+JET.test_package(StridedViews; target_modules=(StridedViews,))
