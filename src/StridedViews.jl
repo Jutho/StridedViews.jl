@@ -12,7 +12,7 @@ include("stridedview.jl")
 
 using PackageExtensionCompat
 function __init__()
-    @require_extensions
+    return @require_extensions
 end
 
 end

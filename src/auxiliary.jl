@@ -73,7 +73,7 @@ _computeviewsize(::Tuple{}, ::Tuple{}) = ()
 # slicing indices
 @inline function _computeviewstrides(oldstrides::NTuple{N,Int},
                                      I::NTuple{N,SliceIndex}) where {N}
-    if isa(I[1], Int)
+    if isa(I[1], Integer)
         return _computeviewstrides(tail(oldstrides), tail(I))
     elseif isa(I[1], Colon)
         return (oldstrides[1], _computeviewstrides(tail(oldstrides), tail(I))...)
