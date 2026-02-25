@@ -298,3 +298,29 @@ if !is_buildkite
         JET.test_package(StridedViews; target_modules = (StridedViews,))
     end
 end
+
+using CUDA, AMDGPU
+
+if CUDA.functional()
+    @testset "CuArrays with StridedView" begin
+        @testset for T in (Float64, ComplexF64)
+            A = CUDA.randn!(T, 10, 10, 10, 10)
+            @test isstrided(A)
+            B = StridedView(A)
+            @test B isa StridedView
+            @test B == A
+        end
+    end
+end
+
+if AMDGPU.functional()
+    @testset "ROCArrays with StridedView" begin
+        @testset for T in (Float64, ComplexF64)
+            A = AMDGPU.randn!(T, 10, 10, 10, 10)
+            @test isstrided(A)
+            B = StridedView(A)
+            @test B isa StridedView
+            @test B == A
+        end
+    end
+end
