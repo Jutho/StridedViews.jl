@@ -2,11 +2,11 @@
 #---------------------
 # Check whether p is a valid permutation of length N
 _isperm(N::Integer, p::AbstractVector) = (length(p) == N && isperm(p))
-_isperm(N::Integer, p::NTuple{M,Integer}) where {M} = (M == N && isperm(p))
+_isperm(N::Integer, p::NTuple{M, Integer}) where {M} = (M == N && isperm(p))
 _isperm(N::Integer, p) = false
 
 # Compute the memory index given a list of cartesian indices and corresponding strides
-@inline function _computeind(indices::NTuple{N,Int}, strides::NTuple{N,Int}) where {N}
+@inline function _computeind(indices::NTuple{N, Int}, strides::NTuple{N, Int}) where {N}
     return (indices[1] - 1) * strides[1] + _computeind(tail(indices), tail(strides))
 end
 _computeind(indices::Tuple{}, strides::Tuple{}) = 1
@@ -23,7 +23,7 @@ function _simplifydims(size::Dims{N}, strides::Dims{N}) where {N}
         return (tailsize..., 1), (tailstrides..., 1)
     elseif size[1] * strides[1] == tailstrides[1]
         return (size[1] * tailsize[1], tail(tailsize)..., 1),
-               (strides[1], tail(tailstrides)..., 1)
+            (strides[1], tail(tailstrides)..., 1)
     else
         return (size[1], tailsize...), (strides[1], tailstrides...)
     end
@@ -58,7 +58,7 @@ end
 #------------------------------
 # Compute the new dimensions of a strided view given the original size and the view slicing
 # indices
-@inline function _computeviewsize(oldsize::NTuple{N,Int}, I::NTuple{N,SliceIndex}) where {N}
+@inline function _computeviewsize(oldsize::NTuple{N, Int}, I::NTuple{N, SliceIndex}) where {N}
     if isa(I[1], Int)
         return _computeviewsize(tail(oldsize), tail(I))
     elseif isa(I[1], Colon)
@@ -71,23 +71,29 @@ _computeviewsize(::Tuple{}, ::Tuple{}) = ()
 
 # Compute the new strides of a (strided) view given the original strides and the view
 # slicing indices
-@inline function _computeviewstrides(oldstrides::NTuple{N,Int},
-                                     I::NTuple{N,SliceIndex}) where {N}
+@inline function _computeviewstrides(
+        oldstrides::NTuple{N, Int},
+        I::NTuple{N, SliceIndex}
+    ) where {N}
     if isa(I[1], Integer)
         return _computeviewstrides(tail(oldstrides), tail(I))
     elseif isa(I[1], Colon)
         return (oldstrides[1], _computeviewstrides(tail(oldstrides), tail(I))...)
     else
-        return (oldstrides[1] * step(I[1]),
-                _computeviewstrides(tail(oldstrides), tail(I))...)
+        return (
+            oldstrides[1] * step(I[1]),
+            _computeviewstrides(tail(oldstrides), tail(I))...,
+        )
     end
 end
 _computeviewstrides(::Tuple{}, ::Tuple{}) = ()
 
 # Compute the additional offset of a (strided) view given the original strides and the view
 # slicing indices
-@inline function _computeviewoffset(strides::NTuple{N,Int},
-                                    I::NTuple{N,SliceIndex}) where {N}
+@inline function _computeviewoffset(
+        strides::NTuple{N, Int},
+        I::NTuple{N, SliceIndex}
+    ) where {N}
     if isa(I[1], Colon)
         return _computeviewoffset(tail(strides), tail(I))
     else
@@ -101,8 +107,10 @@ _computeviewoffset(::Tuple{}, ::Tuple{}) = 0
 # Compute the new strides of a (strided) reshape given the original strides and new and
 # original sizes
 _computereshapestrides(newsize::Tuple{}, oldsize::Tuple{}, strides::Tuple{}) = strides
-function _computereshapestrides(newsize::Tuple{}, oldsize::Dims{N},
-                                strides::Dims{N}) where {N}
+function _computereshapestrides(
+        newsize::Tuple{}, oldsize::Dims{N},
+        strides::Dims{N}
+    ) where {N}
     all(isequal(1), oldsize) || throw(DimensionMismatch())
     return ()
 end
@@ -112,7 +120,7 @@ function _computereshapestrides(newsize::Dims, oldsize::Tuple{}, strides::Tuple{
 end
 function _computereshapestrides(newsize::Dims, oldsize::Dims{N}, strides::Dims{N}) where {N}
     d, r = divrem(oldsize[1], newsize[1])
-    if r == 0
+    return if r == 0
         s1 = strides[1]
         if d == 1
             # not shrinking the following tuples helps type inference
