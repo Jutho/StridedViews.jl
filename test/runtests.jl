@@ -138,7 +138,7 @@ Random.seed!(1234)
             end
         end
         @test reshape(B8, (1, 1, 1)) == reshape(A8, (1, 1, 1)) ==
-              StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
+            StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
         @test reshape(B8, ()) == reshape(A8, ())
     end
 
@@ -245,7 +245,7 @@ end
         @test view(B, :, 1:5, 3, 1:5) === sview(B, :, 1:5, 3, 1:5) === B[:, 1:5, 3, 1:5]
         @test view(B, :, 1:5, 3, 1:5) == StridedView(view(A, :, 1:5, 3, 1:5))
         @test pointer(view(B, :, 1:5, 3, 1:5)) ==
-              pointer(StridedView(view(A, :, 1:5, 3, 1:5)))
+            pointer(StridedView(view(A, :, 1:5, 3, 1:5)))
         @test StridedViews.offset(view(B, :, 1:5, 3, 1:5)) == 2 * stride(B, 3)
     end
 end
@@ -291,5 +291,5 @@ Aqua.test_all(StridedViews)
 
 if isempty(VERSION.prerelease)
     using JET
-    JET.test_package(StridedViews; target_modules=(StridedViews,))
+    JET.test_package(StridedViews; target_modules = (StridedViews,))
 end
