@@ -5,12 +5,12 @@
 | [![CI][ci-img]][ci-url] | [![Codecov][codecov-img]][codecov-url] | [![Aqua QA][aqua-img]][aqua-url] |
 
 [ci-img]:
-    https://github.com/Jutho/StridedViews.jl/actions/workflows/CI.yml/badge.svg?branch=main
+    https://github.com/QuantumKitHub/StridedViews.jl/actions/workflows/CI.yml/badge.svg?branch=main
 [ci-url]:
-    https://github.com/Jutho/StridedViews.jl/actions/workflows/CI.yml?query=branch%3Amain
+    https://github.com/QuantumKitHub/StridedViews.jl/actions/workflows/CI.yml?query=branch%3Amain
 
-[codecov-img]: https://codecov.io/gh/Jutho/StridedViews.jl/branch/main/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/Jutho/StridedViews.jl
+[codecov-img]: https://codecov.io/gh/QuantumKitHub/StridedViews.jl/branch/main/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/QuantumKitHub/StridedViews.jl
 
 [aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
 [aqua-url]: https://github.com/JuliaTesting/Aqua.jl
@@ -23,7 +23,7 @@
 StridedViews.jl exports a single struct type `StridedView` for representing a strided view
 over a contiguous parent array, as represented by the abstract type `DenseArray`.
 
-See [Strided.jl](http://github.com/Jutho/Strided.jl) for more functionality.
+See [Strided.jl](http://github.com/QuantumKitHub/Strided.jl) for more functionality.
 
 ---
 
