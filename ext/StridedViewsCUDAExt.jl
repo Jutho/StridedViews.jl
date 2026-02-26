@@ -6,9 +6,9 @@ using CUDA: Adapt, CuPtr
 
 const CuStridedView{T, N, A <: CuArray{T}} = StridedView{T, N, A}
 
-function Adapt.adapt_structure(::Type{T}, A::StridedView) where {T}
+function Adapt.adapt_structure(to, A::CuStridedView)
     return StridedView(
-        Adapt.adapt_structure(T, parent(A)),
+        Adapt.adapt_structure(to, parent(A)),
         A.size, A.strides, A.offset, A.op
     )
 end
