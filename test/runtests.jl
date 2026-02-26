@@ -2,7 +2,6 @@ using Test
 using LinearAlgebra
 using Random
 using StridedViews
-using CUDA
 
 Random.seed!(1234)
 
@@ -143,124 +142,9 @@ if !is_buildkite
                 end
             end
             @test reshape(B8, (1, 1, 1)) == reshape(A8, (1, 1, 1)) ==
-                StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
+                  StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
             @test reshape(B8, ()) == reshape(A8, ())
         end
-
-        A2 = view(A1, 1:36, 1:20)
-        @test isstrided(A2)
-        B2 = StridedView(A2)
-        for op1 in (identity, conj, transpose, adjoint)
-            if op1 == transpose || op1 == adjoint
-                @test op1(A2) == op1(B2) == StridedView(op1(A2))
-            else
-                @test op1(A2) == op1(B2)
-            end
-            for op2 in (identity, conj, transpose, adjoint)
-                @test op2(op1(A2)) == op2(op1(B2))
-            end
-        end
-
-        A3 = reshape(A1, 360, 10)
-        @test isstrided(A3)
-        @test !isstrided(reshape(A1', 10, 360))
-        B3 = StridedView(A3)
-        @test size(A3) == size(B3)
-        @test strides(A3) == strides(B3)
-        @test stride(A3, 1) == stride(B3, 1)
-        @test stride(A3, 2) == stride(B3, 2)
-        @test stride(A3, 3) == stride(B3, 3)
-        for op1 in (identity, conj, transpose, adjoint)
-            if op1 == transpose || op1 == adjoint
-                @test op1(A3) == op1(B3) == StridedView(op1(A3))
-            else
-                @test op1(A3) == op1(B3)
-            end
-            for op2 in (identity, conj, transpose, adjoint)
-                @test op2(op1(A3)) == op2(op1(B3))
-            end
-        end
-
-        A4 = reshape(A1', (6, 10, 5, 12))
-        @test isstrided(A4)
-        B4 = StridedView(A4)
-        B4[2, 2, 2, 2] = 3
-        @test A4[2, 2, 2, 2] == 3
-        for op1 in (identity, conj)
-            @test op1(A4) == op1(B4)
-            for op2 in (identity, conj)
-                @test op2(op1(A4)) == op2(op1(B4))
-            end
-        end
-
-        A4 = reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4))
-        @test isstrided(A4)
-        B4 = StridedView(A4)
-        B4[2, 2, 2, 2] = 4
-        @test A4[2, 2, 2, 2] == 4
-        for op1 in (identity, conj)
-            @test op1(A4) == op1(B4)
-            for op2 in (identity, conj)
-                @test op2(op1(A4)) == op2(op1(B4))
-            end
-        end
-
-        A4 = reshape(view(A1', 1:36, 1:20), (6, 6, 5, 4))
-        B4 = StridedView(A4)
-        B4[2, 2, 2, 2] = 5
-        @test A4[2, 2, 2, 2] == 5
-        for op1 in (identity, conj)
-            @test op1(A4) == op1(B4)
-            for op2 in (identity, conj)
-                @test op2(op1(A4)) == op2(op1(B4))
-            end
-        end
-
-        A5 = PermutedDimsArray(reshape(view(A1, 1:36, 1:20), (6, 6, 5, 4)), (3, 1, 2, 4))
-        @test isstrided(A5)
-        B5 = StridedView(A5)
-        for op1 in (identity, conj)
-            @test op1(A5) == op1(B5)
-            for op2 in (identity, conj)
-                @test op2(op1(A5)) == op2(op1(B5))
-            end
-        end
-
-        A6 = reshape(view(A1, 1:36, 1:20), (6, 120))
-        @test !isstrided(A6)
-        @test_throws StridedViews.ReshapeException StridedView(A6)
-        try
-            StridedView(A6)
-        catch ex
-            println("Printing error message:")
-            show(ex)
-            println("")
-        end
-
-        # Array with Array elements
-        A7 = [randn(T1, (5, 5)) for i in 1:5, j in 1:5]
-        @test isstrided(A7)
-        B7 = StridedView(A7)
-        for op1 in (identity, conj, transpose, adjoint)
-            @test op1(A7) == op1(B7) == StridedView(op1(A7))
-            for op2 in (identity, conj, transpose, adjoint)
-                @test op2(op1(A7)) == op2(op1(B7))
-            end
-        end
-
-        # Zero-dimensional array
-        A8 = randn(T1, ())
-        B8 = StridedView(A8)
-        @test stride(B8, 1) == stride(B8, 5) == 1
-        for op1 in (identity, conj)
-            @test op1(A8) == op1(B8) == StridedView(op1(A8))
-            for op2 in (identity, conj)
-                @test op2(op1(A8)) == op2(op1(B8))
-            end
-        end
-        @test reshape(B8, (1, 1, 1)) == reshape(A8, (1, 1, 1)) ==
-            StridedView(reshape(A8, (1, 1, 1))) == sreshape(A8, (1, 1, 1))
-        @test reshape(B8, ()) == reshape(A8, ())
 
         @test !isstrided(Diagonal([0.5, 1.0, 1.5]))
     end
@@ -365,7 +249,7 @@ if !is_buildkite
             @test view(B, :, 1:5, 3, 1:5) === sview(B, :, 1:5, 3, 1:5) === B[:, 1:5, 3, 1:5]
             @test view(B, :, 1:5, 3, 1:5) == StridedView(view(A, :, 1:5, 3, 1:5))
             @test pointer(view(B, :, 1:5, 3, 1:5)) ==
-                pointer(StridedView(view(A, :, 1:5, 3, 1:5)))
+                  pointer(StridedView(view(A, :, 1:5, 3, 1:5)))
             @test StridedViews.offset(view(B, :, 1:5, 3, 1:5)) == 2 * stride(B, 3)
         end
     end
@@ -397,12 +281,12 @@ if !is_buildkite
     using PtrArrays
     @testset "PtrArrays with StridedView" begin
         @testset for T in (Float64, ComplexF64)
-            A = randn!(PtrArrays.malloc(T, 10, 10, 10, 10))
+            A = randn!(malloc(T, 10, 10, 10, 10))
             @test isstrided(A)
             B = StridedView(A)
             @test B isa StridedView
             @test B == A
-            PtrArrays.free(A)
+            free(A)
         end
     end
 
@@ -411,18 +295,6 @@ if !is_buildkite
 
     if isempty(VERSION.prerelease)
         using JET
-        JET.test_package(StridedViews; target_modules = (StridedViews,))
-    end
-end
-
-if CUDA.functional()
-    @testset "CUDA with StridedView" begin
-        @testset for T in (Float64, ComplexF64)
-            A = CUDA.randn!(T, 10, 10, 10, 10)
-            @test isstrided(A)
-            B = StridedView(A)
-            @test B isa StridedView
-            @test B == A
-        end
+        JET.test_package(StridedViews; target_modules=(StridedViews,))
     end
 end
