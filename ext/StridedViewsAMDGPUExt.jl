@@ -2,7 +2,7 @@ module StridedViewsAMDGPUExt
 
 using StridedViews
 using AMDGPU
-using AMDGPU: Adapt, ROCPtr
+using AMDGPU: Adapt
 
 const ROCStridedView{T, N, A <: ROCArray{T}} = StridedView{T, N, A}
 
