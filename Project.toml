@@ -4,7 +4,6 @@ authors = ["Lukas Devos <lukas.devos@ugent.be>", "Jutho Haegeman <jutho.haegeman
 version = "0.4.3"
 
 [deps]
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PackageExtensionCompat = "65ce6f38-6b18-4e1d-a461-8949797d7930"
 
@@ -29,10 +28,11 @@ julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Random", "Aqua", "JET", "PtrArrays"]
+test = ["Test", "Random", "Aqua", "JET", "PtrArrays", "CUDA"]
