@@ -2,6 +2,7 @@ using Test
 using LinearAlgebra
 using Random
 using StridedViews
+using JLArrays
 
 Random.seed!(1234)
 
@@ -287,6 +288,21 @@ if !is_buildkite
             @test B isa StridedView
             @test B == A
             free(A)
+        end
+    end
+
+    @testset "JLArrays with StridedView" begin
+        @testset for T in (Float64, ComplexF64)
+            Araw = randn(T, 10, 10, 10, 10)
+            A = JLArray(Araw)
+            @test isstrided(A)
+            B = StridedView(A)
+            @test B isa StridedView
+            JLArrays.@allowscalar begin
+                @test B == A
+            end
+            Bvec = JLArrays.Adapt.adapt(Vector{T}, B)
+            @test Bvec == StridedView(Araw)
         end
     end
 
