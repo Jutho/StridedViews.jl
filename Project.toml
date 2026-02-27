@@ -11,10 +11,12 @@ PackageExtensionCompat = "65ce6f38-6b18-4e1d-a461-8949797d7930"
 AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
 
 [extensions]
 StridedViewsAMDGPUExt = "AMDGPU"
 StridedViewsCUDAExt = "CUDA"
+StridedViewsJLArraysExt = "JLArrays"
 StridedViewsPtrArraysExt = "PtrArrays"
 
 [compat]
@@ -22,6 +24,7 @@ AMDGPU = "2"
 Aqua = "0.8"
 CUDA = "4,5"
 JET = "0.9, 0.10, 0.11"
+JLArrays = "0.3.1"
 LinearAlgebra = "1.6"
 PackageExtensionCompat = "1"
 PtrArrays = "1.2.0"
@@ -34,9 +37,10 @@ AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
 PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Random", "Aqua", "JET", "PtrArrays", "CUDA", "AMDGPU"]
+test = ["Test", "Random", "Aqua", "JET", "PtrArrays", "CUDA", "AMDGPU", "JLArrays"]
