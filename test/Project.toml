@@ -20,5 +20,6 @@ StridedViews = {path = ".."}
 [compat]
 Aqua = "0.8"
 Pkg = "1"
+PtrArrays = "1.4.0"
 Random = "1"
 Test = "1"
